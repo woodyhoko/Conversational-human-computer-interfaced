@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversational HCI — Email Intent Agent Demo</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0d1117;color:#e6edf3;font-family:"Segoe UI",system-ui,sans-serif;padding:20px;min-height:100vh}
+  h1{font-size:20px;margin-bottom:4px;color:#58a6ff}
+  .sub{color:#8b949e;font-size:13px;margin-bottom:20px}
+  .layout{display:grid;grid-template-columns:1fr 380px;gap:16px}
+  @media(max-width:750px){.layout{grid-template-columns:1fr}}
+  .card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:16px;margin-bottom:14px}
+  h2{font-size:12px;color:#8b949e;margin-bottom:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  /* Chat UI */
+  #chat{display:flex;flex-direction:column;gap:8px;min-height:200px;max-height:320px;overflow-y:auto;padding-bottom:4px}
+  .msg{max-width:80%;padding:9px 14px;border-radius:16px;font-size:13px;line-height:1.5}
+  .msg.user{align-self:flex-end;background:#1c3b5e;border-radius:16px 16px 4px 16px}
+  .msg.system{align-self:flex-start;background:#21262d;border-radius:16px 16px 16px 4px}
+  .msg.confirm{align-self:flex-start;background:#1a2b1a;border:1px solid #3fb95050;border-radius:16px 16px 16px 4px}
+  .input-row{display:flex;gap:8px;margin-top:12px}
+  #userInput{flex:1;background:#0d1117;border:1px solid #30363d;border-radius:8px;color:#e6edf3;padding:9px 12px;font-size:13px;font-family:inherit;outline:none}
+  #userInput:focus{border-color:#58a6ff}
+  button.send{padding:9px 16px;border:none;border-radius:8px;cursor:pointer;background:#58a6ff;color:#0d1117;font-weight:700;font-size:13px;transition:.15s}
+  button.send:hover{filter:brightness(1.08)}
+  /* Pipeline */
+  .pipeline{display:flex;flex-direction:column;gap:4px}
+  .stage{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:8px;transition:.4s;border:1px solid transparent}
+  .stage.active{background:#1c2d4a;border-color:#58a6ff50}
+  .stage.done{background:#162316;border-color:#3fb95030}
+  .stage-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex:0 0 28px;background:#21262d;color:#8b949e;transition:.3s}
+  .stage.active .stage-icon{background:#58a6ff;color:#0d1117}
+  .stage.done .stage-icon{background:#3fb950;color:#0d1117}
+  .stage-info{flex:1}
+  .stage-name{font-size:13px;font-weight:600}
+  .stage-detail{font-size:11px;color:#8b949e;margin-top:2px}
+  .stage.active .stage-detail{color:#58a6ff99}
+  /* NLU output */
+  .nlu-card{background:#0d1117;border-radius:8px;padding:10px;font-size:12px;font-family:monospace;margin-top:8px;border:1px solid #21262d}
+  .nlu-key{color:#d29922}
+  .nlu-val{color:#3fb950}
+  .nlu-str{color:#79c0ff}
+  /* Presets */
+  .presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .preset{padding:5px 10px;border:1px solid #30363d;border-radius:20px;cursor:pointer;font-size:12px;color:#8b949e;transition:.15s}
+  .preset:hover{border-color:#58a6ff;color:#58a6ff}
+</style>
+</head>
+<body>
+<h1>Conversational HCI — Email Agent</h1>
+<p class="sub">Voice-to-action email interface. Type a natural language command and watch the NLP pipeline process it in real time.</p>
+
+<div class="layout">
+  <div>
+    <div class="card">
+      <h2>Natural Language Input</h2>
+      <div class="presets">
+        <div class="preset" onclick="setInput('Send an email to Alice saying I\'ll be late to the meeting')">Send email</div>
+        <div class="preset" onclick="setInput('Read my latest emails from Bob')">Read emails</div>
+        <div class="preset" onclick="setInput('Forward the report to the team with a note')">Forward</div>
+        <div class="preset" onclick="setInput('Reply to Dr Chen and confirm the appointment')">Reply</div>
+      </div>
+      <div id="chat"></div>
+      <div class="input-row">
+        <input id="userInput" placeholder="Type a voice/text command (e.g. 'Send email to Alice...')" />
+        <button class="send" onclick="processInput()">Send</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>NLU Extraction Result</h2>
+      <div class="nlu-card" id="nluOut"><span style="color:#8b949e">// awaiting input…</span></div>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <h2>Processing Pipeline</h2>
+      <div class="pipeline" id="pipeline">
+        <div class="stage" id="s0"><div class="stage-icon">🎙</div><div class="stage-info"><div class="stage-name">Speech → Text</div><div class="stage-detail">Google Speech API / DeepSpeech — acoustic model transcription</div></div></div>
+        <div class="stage" id="s1"><div class="stage-icon">🧠</div><div class="stage-info"><div class="stage-name">Intent Classification</div><div class="stage-detail">Bi-LSTM classifier — SEND / READ / FORWARD / CONFIRM / PICK</div></div></div>
+        <div class="stage" id="s2"><div class="stage-icon">🔍</div><div class="stage-info"><div class="stage-name">Named Entity Recognition</div><div class="stage-detail">Bi-LSTM + CRF — recipient, subject, content extraction</div></div></div>
+        <div class="stage" id="s3"><div class="stage-icon">🔄</div><div class="stage-info"><div class="stage-name">Dialogue Management</div><div class="stage-detail">State machine — slot filling, confirmation request</div></div></div>
+        <div class="stage" id="s4"><div class="stage-icon">📧</div><div class="stage-info"><div class="stage-name">Gmail API Action</div><div class="stage-detail">OAuth 2.0 → draft / send / list / forward via REST</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const INTENTS = {
+  send: { keywords: ['send','write','compose','draft'], label: 'SEND_EMAIL' },
+  read: { keywords: ['read','show','check','get','fetch','list'], label: 'READ_EMAIL' },
+  forward: { keywords: ['forward','fwd'], label: 'FORWARD_EMAIL' },
+  reply: { keywords: ['reply','respond','answer'], label: 'REPLY_EMAIL' },
+  confirm: { keywords: ['yes','confirm','okay','ok','sure','send it'], label: 'CONFIRM' },
+};
+const TO_PATTERNS = [/to ([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)/i, /email ([A-Z][a-z]+)/i];
+const CONTENT_PATTERNS = [/saying (.+)/i, /that (.+)/i, /with a note (.+)/i, /note[:\s]+(.+)/i];
+const SUBJECT_PATTERNS = [/subject[:\s]+(.+?)(?:\s|$)/i, /about (.+?)(?:\s|$)/i, /re:\s*(.+)/i];
+
+function classify(text) {
+  const t = text.toLowerCase();
+  for (const [k, v] of Object.entries(INTENTS)) { if (v.keywords.some(w => t.includes(w))) return v.label; }
+  return 'UNKNOWN';
+}
+function extract(text) {
+  let recipient = null, content = null, subject = null;
+  for (const p of TO_PATTERNS) { const m = text.match(p); if (m) { recipient = m[1]; break; } }
+  for (const p of CONTENT_PATTERNS) { const m = text.match(p); if (m) { content = m[1].trim(); break; } }
+  for (const p of SUBJECT_PATTERNS) { const m = text.match(p); if (m) { subject = m[1].trim(); break; } }
+  return { recipient, content, subject };
+}
+
+function addMsg(text, cls) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + cls;
+  d.textContent = text;
+  document.getElementById('chat').appendChild(d);
+  document.getElementById('chat').scrollTop = 9999;
+}
+
+function showNLU(intent, entities, conf) {
+  const el = document.getElementById('nluOut');
+  const ent = Object.entries(entities).filter(([, v]) => v).map(([k, v]) => `\n    <span class="nlu-key">"${k}"</span>: <span class="nlu-str">"${v}"</span>`).join(',');
+  el.innerHTML = `{<br>  <span class="nlu-key">"intent"</span>: <span class="nlu-val">"${intent}"</span>,<br>  <span class="nlu-key">"confidence"</span>: <span class="nlu-val">${conf.toFixed(2)}</span>,<br>  <span class="nlu-key">"entities"</span>: {${ent}<br>  }<br>}`;
+}
+
+async function activateStage(idx, detail) {
+  for (let i = 0; i < 5; i++) { const s = document.getElementById('s' + i); s.className = 'stage' + (i < idx ? ' done' : ''); }
+  const s = document.getElementById('s' + idx); s.className = 'stage active';
+  if (detail) s.querySelector('.stage-detail').textContent = detail;
+  await new Promise(r => setTimeout(r, 500));
+}
+
+async function processInput() {
+  const input = document.getElementById('userInput').value.trim();
+  if (!input) return;
+  document.getElementById('userInput').value = '';
+  addMsg(input, 'user');
+  // reset pipeline
+  for (let i = 0; i < 5; i++) document.getElementById('s' + i).className = 'stage';
+
+  await activateStage(0, 'Transcribed: "' + input + '"');
+  const intent = classify(input);
+  await activateStage(1, 'Detected intent: ' + intent + ' (conf: ' + (0.82 + Math.random() * 0.15).toFixed(2) + ')');
+  const entities = extract(input);
+  await activateStage(2, 'Entities: ' + JSON.stringify(entities).slice(0, 60));
+  showNLU(intent, entities, 0.82 + Math.random() * 0.15);
+
+  if (intent === 'SEND_EMAIL') {
+    if (!entities.recipient) {
+      await activateStage(3, 'Slot missing: recipient — requesting clarification');
+      addMsg('Who would you like to send the email to?', 'system');
+      return;
+    }
+    if (!entities.content) {
+      await activateStage(3, 'Slot missing: content — requesting clarification');
+      addMsg(`What would you like to say to ${entities.recipient}?`, 'system');
+      return;
+    }
+    await activateStage(3, 'All slots filled — generating confirmation request');
+    addMsg(`Sending to ${entities.recipient}: "${entities.content}". Confirm?`, 'confirm');
+    await activateStage(4, 'Awaiting confirmation before Gmail API call');
+  } else if (intent === 'READ_EMAIL') {
+    await activateStage(3, 'Query resolved — listing emails');
+    await activateStage(4, 'GET /gmail/v1/users/me/messages?maxResults=5');
+    addMsg('📬 Fetching your latest emails from ' + (entities.recipient || 'all senders') + '…', 'system');
+  } else if (intent === 'CONFIRM') {
+    await activateStage(3, 'Confirmation received');
+    await activateStage(4, 'POST /gmail/v1/users/me/messages/send → 200 OK');
+    addMsg('✅ Email sent successfully.', 'system');
+  } else if (intent === 'FORWARD_EMAIL') {
+    await activateStage(3, 'Forward action resolved');
+    await activateStage(4, 'POST /gmail/v1/users/me/messages/send → forwarding');
+    addMsg('↩ Forwarding email' + (entities.recipient ? ' to ' + entities.recipient : '') + '…', 'system');
+  } else {
+    await activateStage(3, 'Intent unclear — fallback');
+    addMsg('I\'m not sure what you\'d like to do. Try: "Send email to [name] saying [message]"', 'system');
+  }
+}
+
+function setInput(t) { document.getElementById('userInput').value = t; }
+document.getElementById('userInput').addEventListener('keydown', e => { if (e.key === 'Enter') processInput(); });
+</script>
+</body>
+</html>
