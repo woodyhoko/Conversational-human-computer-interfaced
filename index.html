@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversational HCI — Voice-Driven Email Agent</title>
+<meta name="description" content="A multilingual conversational interface for Gmail chaining speech recognition, intent classification and NER to execute email actions from natural language.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#070d14;--ink:#e8f1fb;--muted:#82a0bd;--bl:#38bdf8;--tl:#2dd4bf;--in:#818cf8;--line:rgba(255,255,255,.08)}
+  *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif;line-height:1.6;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  .bg{position:fixed;inset:0;z-index:0;background:radial-gradient(900px 600px at 30% -5%,#0d2438 0,var(--bg) 60%)}
+  .wave{position:fixed;left:0;right:0;top:0;z-index:1;height:100%;opacity:.5}
+  .wrap{position:relative;z-index:3;max-width:1020px;margin:0 auto;padding:0 24px}
+  header{min-height:90vh;display:flex;flex-direction:column;justify-content:center;padding:80px 0 36px}
+  .tag{font-family:"Space Mono";font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--tl);margin-bottom:20px}
+  h1{font-weight:800;font-size:clamp(36px,6.5vw,80px);line-height:1.02;letter-spacing:-1.5px}
+  h1 .gr{background:linear-gradient(110deg,var(--bl),var(--in));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:clamp(16px,2vw,21px);color:var(--muted);max-width:660px;margin:24px 0}
+  .cta{display:flex;flex-wrap:wrap;gap:13px;margin-top:30px}
+  .btn{display:inline-flex;align-items:center;gap:9px;padding:14px 25px;border-radius:12px;font-weight:700;font-size:15px;transition:.18s;border:1px solid var(--line)}
+  .btn.p{background:linear-gradient(110deg,var(--bl),var(--in));color:#04121f;border:none}.btn.p:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(56,189,248,.35)}
+  .btn.g{background:rgba(255,255,255,.03)}.btn.g:hover{border-color:var(--bl);color:var(--bl);transform:translateY(-3px)}
+  section{padding:48px 0}
+  .lbl{font-family:"Space Mono";font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--in);margin-bottom:8px}
+  .ttl{font-weight:800;font-size:clamp(23px,3.4vw,36px);margin-bottom:28px;letter-spacing:-.5px}
+  .pipe{display:flex;flex-direction:column;gap:10px}
+  .step{display:flex;align-items:center;gap:16px;background:rgba(13,30,48,.55);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:14px;padding:18px 22px;transition:.2s}
+  .step:hover{transform:translateX(6px);border-color:rgba(56,189,248,.4)}
+  .step .n{font-family:"Space Mono";font-weight:700;color:var(--tl);font-size:14px;min-width:28px}
+  .step h3{font-size:16px}.step p{font-size:13px;color:var(--muted)}
+  .step .out{margin-left:auto;font-family:"Space Mono";font-size:12px;color:var(--bl);white-space:nowrap}
+  .dlg{background:#060c15;border:1px solid var(--line);border-radius:16px;padding:24px;font-family:"Space Mono";font-size:14px;line-height:1.9}
+  .dlg .u{color:var(--tl)}.dlg .s{color:var(--bl)}
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:38px 0 56px;text-align:center;color:var(--muted);font-size:14px}
+  footer a{color:var(--bl)}.fl{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+  @media(max-width:640px){.step .out{display:none}}
+</style></head>
+<body>
+<div class="bg"></div>
+<svg class="wave" preserveAspectRatio="none" viewBox="0 0 1200 800"><path id="wv" fill="none" stroke="#38bdf8" stroke-width="1.3" opacity=".3"/></svg>
+<div class="wrap">
+  <header>
+    <div class="tag">Speech · NLU · Mandarin + English</div>
+    <h1>Talk to your<br><span class="gr">inbox.</span></h1>
+    <p class="lede">A conversational email agent that chains speech recognition → intent classification → named entity recognition → dialogue management → Gmail execution. It figures out what you want to do, who with, and what to say — then confirms before sending.</p>
+    <div class="cta">
+      <a class="btn p" href="demo.html">▶ Pipeline Demo</a>
+      <a class="btn g" href="https://github.com/woodyhoko/Conversational-human-computer-interfaced/blob/main/proposal.pdf">📄 Proposal</a>
+      <a class="btn g" href="https://github.com/woodyhoko/Conversational-human-computer-interfaced/blob/main/poster.pdf">🖼️ Poster</a>
+      <a class="btn g" href="https://github.com/woodyhoko/Conversational-human-computer-interfaced#readme">📖 Docs</a>
+    </div>
+  </header>
+
+  <section>
+    <div class="lbl">architecture</div>
+    <div class="ttl">A five-stage NLP pipeline.</div>
+    <div class="pipe">
+      <div class="step"><span class="n">01</span><div><h3>Speech recognition</h3><p>Google / Bing / Kaldi / DeepSpeech back-ends</p></div><span class="out">→ transcript</span></div>
+      <div class="step"><span class="n">02</span><div><h3>Intent classification</h3><p>Hybrid dictionary + ML over 5 intents</p></div><span class="out">→ {READ, SEND, PICK…}</span></div>
+      <div class="step"><span class="n">03</span><div><h3>Named entity recognition</h3><p>Bi-LSTM + CRF — 83.7 F1 on the dev set</p></div><span class="out">→ {recipient, content…}</span></div>
+      <div class="step"><span class="n">04</span><div><h3>Dialogue manager</h3><p>Slot-filling FSM with clarification + confirm</p></div><span class="out">→ action spec</span></div>
+      <div class="step"><span class="n">05</span><div><h3>Gmail executor</h3><p>list / read / send / forward — never without confirm</p></div><span class="out">→ TTS reply</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="lbl">example</div>
+    <div class="ttl">A real exchange.</div>
+    <div class="dlg">
+<span class="u">User:</span>  "Send an email to Alice saying I'll be late to the meeting."<br>
+<span class="s">System:</span> "Sending to Alice: 'I'll be late to the meeting.' Confirm?"<br>
+<span class="u">User:</span>  "Yes."<br>
+<span class="s">System:</span> "Email sent."
+    </div>
+  </section>
+
+  <footer>
+    <div class="fl"><a href="demo.html">Demo</a><a href="https://github.com/woodyhoko/Conversational-human-computer-interfaced">GitHub</a><a href="https://github.com/woodyhoko/Conversational-human-computer-interfaced#readme">README</a></div>
+    Built by <a href="https://github.com/woodyhoko">woodyhoko</a> · Voice-Driven Email Intent Agent
+  </footer>
+</div>
+<script>
+  const p=document.getElementById('wv');let t=0;
+  function d(){t+=0.02;let s="M0 400";for(let x=0;x<=1200;x+=10){const y=400+Math.sin(x*0.02+t)*40*Math.cos(x*0.006-t*0.5)+Math.sin(x*0.05+t*1.4)*14;s+=` L${x} ${y.toFixed(1)}`;}p.setAttribute('d',s);requestAnimationFrame(d);}
+  d();
+</script>
+</body></html>
