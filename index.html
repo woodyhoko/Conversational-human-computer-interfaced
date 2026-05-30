@@ -35,6 +35,15 @@
   .step .out{margin-left:auto;font-family:"Space Mono";font-size:12px;color:var(--bl);white-space:nowrap}
   .dlg{background:#060c15;border:1px solid var(--line);border-radius:16px;padding:24px;font-family:"Space Mono";font-size:14px;line-height:1.9}
   .dlg .u{color:var(--tl)}.dlg .s{color:var(--bl)}
+  .demo-card{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#060c15;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+  .demo-bar{display:flex;align-items:center;gap:7px;padding:11px 16px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+  .demo-bar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .demo-bar .t{margin-left:10px;font-family:"Space Mono";font-size:12px;color:var(--muted)}
+  .demo-frame{position:relative;width:100%;aspect-ratio:16/10;background:#0d1117}
+  .demo-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+  .demo-cap{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-top:16px}
+  .demo-cap p{font-size:13px;color:var(--muted);max-width:560px}
+  @media(max-width:640px){.demo-frame{aspect-ratio:3/4}}
   footer{border-top:1px solid var(--line);margin-top:50px;padding:38px 0 56px;text-align:center;color:var(--muted);font-size:14px}
   footer a{color:var(--bl)}.fl{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
   @media(max-width:640px){
@@ -83,6 +92,19 @@
 <span class="s">System:</span> "Sending to Alice: 'I'll be late to the meeting.' Confirm?"<br>
 <span class="u">User:</span>  "Yes."<br>
 <span class="s">System:</span> "Email sent."
+    </div>
+  </section>
+
+  <section>
+    <div class="lbl">live demo</div>
+    <div class="ttl">Watch the pipeline run.</div>
+    <div class="demo-card">
+      <div class="demo-bar"><i style="background:var(--bl)"></i><i style="background:var(--in)"></i><i style="background:var(--tl)"></i><span class="t">demo.html — email intent agent</span></div>
+      <div class="demo-frame"><iframe src="demo.html" loading="lazy" title="Interactive conversational email-agent demo"></iframe></div>
+    </div>
+    <div class="demo-cap">
+      <p>Type a natural-language command (or pick a preset) and watch intent classification, entity extraction and dialogue management light up stage by stage.</p>
+      <a class="btn p" href="demo.html">▶ Open full demo</a>
     </div>
   </section>
 
