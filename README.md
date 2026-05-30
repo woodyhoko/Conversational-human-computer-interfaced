@@ -2,7 +2,9 @@
 
 *A multilingual conversational interface for Gmail that chains speech recognition, intent classification, and named entity recognition to execute email actions from natural language commands.*
 
-📄 **[Read the Proposal](https://github.com/woodyhoko/Conversational-human-computer-interfaced/blob/main/proposal.pdf)** | 🖼️ **[View the System Poster](https://github.com/woodyhoko/Conversational-human-computer-interfaced/blob/main/poster.pdf)** | **[▶ Pipeline Demo](demo.html)**
+📄 **[English Paper](PAPER_EN.md)** | 📄 **[Read the Proposal](https://github.com/woodyhoko/Conversational-human-computer-interfaced/blob/main/proposal.pdf)** | 🖼️ **[View the System Poster](https://github.com/woodyhoko/Conversational-human-computer-interfaced/blob/main/poster.pdf)** | **[▶ Pipeline Demo](demo.html)**
+
+> The full paper was originally written in Traditional Chinese (`應用於對話式介面之語句用意分析4.docx`). An **English version** is available at **[PAPER_EN.md](PAPER_EN.md)**. Note the paper is a **research proposal** (plan + expected results), and `demo.html` is a **simplified illustration** of the proposed pipeline — not the full system.
 
 ---
 
@@ -136,8 +138,9 @@ System: "Email from Carol: 'Can we reschedule?'…"
 |---|---|
 | `proposal.pdf` | Full research proposal — problem, related work, system design |
 | `poster.pdf` | System architecture poster (conference format) |
-| `應用於對話式介面之語句用意分析4.docx` | Full paper in Traditional Chinese |
-| `demo.html` | Interactive pipeline visualizer |
+| `應用於對話式介面之語句用意分析4.docx` | Full paper (original, Traditional Chinese) |
+| `PAPER_EN.md` | English version of the paper |
+| `demo.html` | Interactive pipeline visualizer (simplified illustration) |
 
 ---
 
